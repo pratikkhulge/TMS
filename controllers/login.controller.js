@@ -132,8 +132,9 @@ module.exports.userLogin = async (req, res) => {
       return res.status(401).send({ message: "Incorrect email or password." });
     }
 
+    const organisations = user.organisationNames;
     // Generate JWT token
-    const token = jwtService.signToken({ email: user.email, role: "user" });
+    const token = jwtService.signToken({ email: user.email, role: "user" , organisation: organisations});
     res.setHeader('Authorization', `Bearer ${token}`);
     res.status(200).send({ message: "Login successful." ,token});
   } catch (error) {

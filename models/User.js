@@ -33,6 +33,9 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
+  organisationNames: [{
+    type: String // Store the names of the organizations
+  }],
   organisationJoiningDate: {
     type: Date,
     default: Date.now
@@ -62,7 +65,26 @@ const userSchema = new mongoose.Schema({
   department: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department'
-  }
+  },
+  ticketCount: {
+    type: Number,
+    default: 0
+  },
+  tickets: [{
+    ticketId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Ticket'
+    },
+    status: {
+      type: String,
+      enum: ['TOBEPICKED', 'INPROGRESS', 'INTESTING', 'COMPLETED'],
+      default: 'TOBEPICKED'
+    },
+    assignee: {
+      type: String,
+      default: null
+    }
+  }]
 });
 
 module.exports  = mongoose.model("User", userSchema);

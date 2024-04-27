@@ -1,4 +1,5 @@
 const { verifyToken } = require('../services/JWT');
+const User = require('../models/User');
 
 const authorizeAdmin = async (req, res) => {
   const BearerToken = req.headers.authorization;
@@ -15,12 +16,24 @@ const authorizeAdmin = async (req, res) => {
     return { authorized: false, message: 'Unauthorized: Invalid token' };
   }
 
-  const { role } = tokenData.data;
-  if (role !== 'admin') {
-    return { authorized: false, message: 'Only admins can perform this action' };
-  }
+  const { email, role } = tokenData.data;
 
-  return { authorized: true };
+  // Check if the user with the email exists in the database
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return { authorized: false, message: 'Unauthorized: User does not exist' };
+    }
+
+    if (role !== 'admin') {
+      return { authorized: false, message: 'Only admins can perform this action' };
+    }
+
+    return { authorized: true };
+  } catch (error) {
+    console.error('Error checking user existence:', error);
+    return { authorized: false, message: 'Internal server error' };
+  }
 };
 
 module.exports = { authorizeAdmin };

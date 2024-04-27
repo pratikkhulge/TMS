@@ -24,28 +24,54 @@ module.exports.signUpAdmin = async (req, res) => {
 
 module.exports.signUpUser = async (req, res) => {
   const { firstName, lastName, email, password, dateOfBirth, organisation_name } = req.body;
-  
-  // Find the department by name or create a new one if it doesn't exist
-  let department = await Department.findOne({ organisation_name: organisation_name });
 
-  if (!department) {
-    return res.status(404).send({
-      message: "No such department exists",
-    });
+  try {
+    // Check if the user already exists with the provided email
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      if (existingUser.organisationNames.includes(organisation_name)) {
+        return res.status(409).send({ message: "User already exists in the organization." });
+      } else {
+        const existingDepartment = await Department.findOne({ organisation_name });
+
+        if (!existingDepartment) {
+          return res.status(404).send({ message: "No such department exists." });
+        }
+        existingUser.organisationNames.push(organisation_name);
+        await existingUser.save();
+
+        // Update the department's users array with the new user
+        existingDepartment.users.push({ userId: existingUser._id, name: `${firstName} ${lastName}`,email:email, active: false });
+        await existingDepartment.save();
+
+        return res.status(200).send({ message: "User added to another organization." });
+      }
+    }
+
+
+    // If user doesn't exist, proceed with user creation
+    let department = await Department.findOne({ organisation_name });
+
+    if (!department) {
+      return res.status(404).send({ message: "No such department exists." });
+    }
+
+    // Create the user and associate it with the department
+    const newUser = await createUser(email, password, firstName, lastName, dateOfBirth, department._id, organisation_name);
+
+    if (!newUser[0]) {
+      return res.status(400).send({ message: "Unable to create new user." });
+    }
+
+    // Send success response
+    res.send(newUser);
+  } catch (error) {
+    console.error("User signup error:", error);
+    res.status(500).send({ message: "Internal server error." });
   }
-
-  // Create the user and associate it with the department
-  const newUser = await createUser(email, password, firstName, lastName, dateOfBirth, department._id, organisation_name);
-
-  if (!newUser[0]) {
-    return res.status(400).send({
-      message: "Unable to create new user"
-    });
-  }
-  
-  // Send success response
-  res.send(newUser);
 };
+
 
 module.exports.verifyAdminEmail = async (req, res) => {
   const { email, otp } = req.body;
@@ -112,7 +138,7 @@ const validateAdminSignUp = async (email, otp) => {
 };
 
 // Function to create a new user
-const createUser = async (email, password, firstName, lastName, dateOfBirth, departmentId , organisation_name) => {
+const createUser = async (email, password, firstName, lastName, dateOfBirth, departmentId, organisation_name) => {
   const hashedPassword = await encrypt(password);
   const otpGenerated = generateOTP();
   const newUser = await User.create({
@@ -122,33 +148,47 @@ const createUser = async (email, password, firstName, lastName, dateOfBirth, dep
     password: hashedPassword,
     dateOfBirth,
     department: departmentId,
+    organisationNames: [organisation_name], // Initialize organisationNames array with the current organisation name
     otp: {
       code: otpGenerated,
       createdAt: new Date(),
     },
   });
+
   if (!newUser) {
     return [false, "Unable to sign up user"];
   }
 
-  await Department.findOneAndUpdate(
-    { organisation_name: organisation_name },
-    { $push: { users: { userId: newUser._id, name: `${firstName} ${lastName}`, active: false } } }
-  );
-  
-  console.log(`User added to department: ${organisation_name}`);
-  
-
   try {
+    // Check if the department exists
+    const existingDepartment = await Department.findOne({ organisation_name });
+
+    if (existingDepartment) {
+      // If the department exists, update it with the new user information
+      await Department.findOneAndUpdate(
+        { organisation_name: organisation_name },
+        { $push: { users: { userId: newUser._id, name: `${firstName} ${lastName}`,email:email, active: false } } }
+      );
+
+      console.log(`User added to department: ${organisation_name}`);
+    } else {
+      // If the department doesn't exist, handle the error accordingly
+      console.error(`Department ${organisation_name} not found`);
+      return [false, `Department ${organisation_name} not found`];
+    }
+
+    // Send success response
     await sendMail({
       to: email,
       OTP: otpGenerated,
     });
     return [true, newUser];
   } catch (error) {
+    console.error("User signup error:", error);
     return [false, "Unable to sign up user, Please try again later", error];
   }
 };
+
 
 // Function to validate user signup with OTP
 const validateUserSignUp = async (email, otp) => {
@@ -185,7 +225,7 @@ module.exports.generateNewAdminOTP = async (req, res) => {
   }
 
   if (admin.active) {
-    return res.send({message:"User is already verified"});
+    return res.send({ message: "User is already verified" });
   }
   const newOTP = generateOTP();
   await Admin.findByIdAndUpdate(admin._id, {
@@ -215,7 +255,7 @@ module.exports.generateNewUserOTP = async (req, res) => {
   }
 
   if (user.active) {
-    return res.send("User is already verified");
+    return res.send({ message: "User is already verified" });
   }
 
   const newOTP = generateOTP();
