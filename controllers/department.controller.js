@@ -30,23 +30,23 @@ const updateDepartment = async (req, res) => {
 
   try {
     const { organizationName } = req.params;
-    const { newDepartmentName, newOrganizationName } = req.body;
+    const { departmentname , organisation_name } = req.body;
 
     const department = await Department.findOne({ organisation_name: organizationName });
     if (!department) {
       return res.status(404).send({ message: 'Department not found' });
     }
 
-    if (newOrganizationName) {
-      const existingDepartment = await Department.findOne({ organisation_name: newOrganizationName });
+    if (organisation_name) {
+      const existingDepartment = await Department.findOne({ organisation_name: organisation_name });
       if (existingDepartment && existingDepartment._id.toString() !== department._id.toString()) {
         return res.status(400).send({ message: 'Organization name already associated with another department' });
       }
     }
 
-    department.name = newDepartmentName;
-    if (newOrganizationName) {
-      department.organisation_name = newOrganizationName;
+    department.name = departmentname ;
+    if (organisation_name) {
+      department.organisation_name = organisation_name;
     }
     await department.save();
 

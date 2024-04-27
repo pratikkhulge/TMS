@@ -170,7 +170,7 @@ const createUser = async (email, password, firstName, lastName, dateOfBirth, dep
         { $push: { users: { userId: newUser._id, name: `${firstName} ${lastName}`,email:email, active: false } } }
       );
 
-      console.log(`User added to department: ${organisation_name}`);
+      // ? console.log(`User added to department: ${organisation_name}`);
     } else {
       // If the department doesn't exist, handle the error accordingly
       console.error(`Department ${organisation_name} not found`);

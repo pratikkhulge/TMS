@@ -9,9 +9,7 @@ router.post("/", authController.signUpUser);
 router.post("/verify", authController.verifyUserEmail);
 router.post("/resendotp", authController.generateNewUserOTP);
 router.post('/login', loginController.userLogin);
-router.get('/ticket', ticketController.showTicketsInOrganization);
-router.get('/ticket', ticketController.showTicketsInOrganization);
-
-router.post('/ticket/create', ticketController.createTicket);
-router.put('/ticket/update/:key', ticketController.updateTicket);
+router.get('/tickets', ticketController.showTicketsInOrganization);
+router.post('/tickets/create', ticketController.createTicket);
+router.put('/tickets/update/:key', ticketController.updateTicket);
 module.exports = router;

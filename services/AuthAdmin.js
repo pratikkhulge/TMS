@@ -1,5 +1,5 @@
 const { verifyToken } = require('../services/JWT');
-const User = require('../models/User');
+const Admin = require('../models/Admin');
 
 const authorizeAdmin = async (req, res) => {
   const BearerToken = req.headers.authorization;
@@ -18,11 +18,11 @@ const authorizeAdmin = async (req, res) => {
 
   const { email, role } = tokenData.data;
 
-  // Check if the user with the email exists in the database
+  // * Check if the admin with the email exists in the database
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return { authorized: false, message: 'Unauthorized: User does not exist' };
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return { authorized: false, message: 'Unauthorized: admin does not exist' };
     }
 
     if (role !== 'admin') {
@@ -31,7 +31,7 @@ const authorizeAdmin = async (req, res) => {
 
     return { authorized: true };
   } catch (error) {
-    console.error('Error checking user existence:', error);
+    console.error('Error checking admin existence:', error);
     return { authorized: false, message: 'Internal server error' };
   }
 };
