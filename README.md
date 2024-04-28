@@ -63,7 +63,7 @@ The frontend codebase follows a standard Next.js folder structure:
 
 To set up the Ticket Management System locally, follow these steps:
 
-1. Clone the repository: `git clone <repository-url>`
+1. Clone the repository: `git clone git@github.com:pratikkhulge/TMS.git`
 2. Navigate to the backend folder and install dependencies: `cd backend && npm install`
 3. Set up MongoDB and Redis databases.
 4. Create a `.env` file based on the provided `SERVER_DB_URI`,` JWT_SECRET`,`MAIL_SETTINGS`,`OTP_CONFIG` and configure environment variables.
