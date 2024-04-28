@@ -1,9 +1,8 @@
 const addComment = async (req, res) => {
     try {
       const { text } = req.body;
-      const { organisationName, email } = req.user; // Assuming user details are available in req.user
+      const { organisationName, email } = req.user; 
   
-      // Find the ticket
       const ticket = await Ticket.findOne({ key: req.params.key, organisationName });
       if (!ticket) {
         return res.status(404).json({ message: 'Ticket not found or does not belong to your organization' });
@@ -22,7 +21,7 @@ const addComment = async (req, res) => {
   const editComment = async (req, res) => {
     try {
       const { text } = req.body;
-      const { organisationName, email } = req.user; // Assuming user details are available in req.user
+      const { organisationName, email } = req.user; 
   
       // Find the ticket
       const ticket = await Ticket.findOne({ key: req.params.key, organisationName });

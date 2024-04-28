@@ -57,11 +57,11 @@ const ticketSchema = new mongoose.Schema({
     required: true
   },
   assignee: {
-    type: String, // Changed type to String to store email addresses
+    type: String, 
     required: true
   },
   reporter: {
-    type: String, // Changed type to String to store email addresses
+    type: String, 
     required: true
   },
   status: {
@@ -88,9 +88,9 @@ const ticketSchema = new mongoose.Schema({
       name: { type: String },
       url: { type: String }
     }
-  ], // Array of file paths
-  history: [historyLogSchema] ,// Array of history logs
-  comments: [commentSchema] // Array of comment objects
+  ], 
+  history: [historyLogSchema] ,
+  comments: [commentSchema] 
 });
 
 const Ticket = mongoose.model('Ticket', ticketSchema);

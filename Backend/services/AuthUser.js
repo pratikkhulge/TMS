@@ -12,7 +12,7 @@ const authorizeUser = async (req, res) => {
     const tokenParts = BearerToken.split(' ');
     const token = tokenParts[1];
 
-    console.log( "Token Created ",token);
+    // !console.log( "Token Created ",token);
   
     const [isTokenValid, message, tokenData] = verifyToken(token);
     if (!isTokenValid) {
@@ -20,14 +20,14 @@ const authorizeUser = async (req, res) => {
     }
   
     const { role, organisation , email} = tokenData.data;
-    console.log("organisation at Token Data ", organisation);
-    console.log("role at Token Data ",role)
+    // !console.log("organisation at Token Data ", organisation);
+    // !console.log("role at Token Data ",role)
     if (role !== 'user') {
       return { authorized: false, message: 'Only users can perform this action' };
     }
     
-    // console.log(`Authorizing user ${organisation}` , true);
-    console.log("Organisation Passed By JWT" , organisation);
+    // !console.log(`Authorizing user ${organisation}` , true);
+    // !console.log("Organisation Passed By JWT" , organisation);
     return { authorized: true, organisation , email};
   };
   

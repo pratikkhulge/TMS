@@ -23,7 +23,7 @@ module.exports.sendMail = async (params) => {
     });
     return info;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return false;
   }
 };

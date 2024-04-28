@@ -1,20 +1,5 @@
 const mongoose = require("mongoose");
 
-// Schema for Department
-// const departmentSchema = new mongoose.Schema({
-//   name: {
-//     type: String,
-//     required: true,
-//     unique: true 
-//   },
-//   users: [{
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'User' 
-//   }]
-// });
-
-
-// Schema for User
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -27,14 +12,14 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true // Ensure email addresses are unique
+    unique: true 
   },
   dateOfBirth: {
     type: Date,
     required: true
   },
   organisationNames: [{
-    type: String // Store the names of the organizations
+    type: String 
   }],
   organisationJoiningDate: {
     type: Date,

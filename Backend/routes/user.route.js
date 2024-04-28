@@ -2,8 +2,6 @@ const router = require("express").Router();
 const authController = require("../controllers/auth.controller");
 const loginController = require("../controllers/login.controller");
 const ticketController = require("../controllers/ticket.controller");
-// const ticketController = require("../controllers/ticket.controller");
-
 
 router.post("/", authController.signUpUser);
 router.post("/verify", authController.verifyUserEmail);
