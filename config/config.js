@@ -1,12 +1,14 @@
 const express = require("express");
-const cors = require("cors");
+// const cors = require("cors");
 const app = express();
 const mongoose = require("mongoose");
 const { SERVER_PORT } = require("../constants/constants");
+// const {corsOptions} = require("./cors");
+const cors = require("./cors");
 
 // Application configurations
 const PORT = SERVER_PORT;
-app.use(cors());
+app.use(cors);
 app.use(express.json());
 
 // Application Routing

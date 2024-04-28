@@ -31,7 +31,7 @@ module.exports.signUpUser = async (req, res) => {
 
     if (existingUser) {
       if (existingUser.organisationNames.includes(organisation_name)) {
-        return res.status(409).send({ message: "User already exists in the organization." });
+        return res.status(404).send({ message: "User already exists in the organization." });
       } else {
         const existingDepartment = await Department.findOne({ organisation_name });
 
@@ -42,7 +42,7 @@ module.exports.signUpUser = async (req, res) => {
         await existingUser.save();
 
         // Update the department's users array with the new user
-        existingDepartment.users.push({ userId: existingUser._id, name: `${firstName} ${lastName}`,email:email, active: false });
+        existingDepartment.users.push({ userId: existingUser._id, name: `${firstName} ${lastName}`, email: email, active: false });
         await existingDepartment.save();
 
         return res.status(200).send({ message: "User added to another organization." });
@@ -65,7 +65,8 @@ module.exports.signUpUser = async (req, res) => {
     }
 
     // Send success response
-    res.send(newUser);
+    // res.send(newUser);
+    res.send({ message: `Wlecone ${firstName} ${lastName} User Registered Succesfully` });
   } catch (error) {
     console.error("User signup error:", error);
     res.status(500).send({ message: "Internal server error." });
@@ -82,6 +83,7 @@ module.exports.verifyAdminEmail = async (req, res) => {
 module.exports.verifyUserEmail = async (req, res) => {
   const { email, otp } = req.body;
   const user = await validateUserSignUp(email, otp);
+  console.log(user);
   res.send(user);
 };
 
@@ -167,7 +169,7 @@ const createUser = async (email, password, firstName, lastName, dateOfBirth, dep
       // If the department exists, update it with the new user information
       await Department.findOneAndUpdate(
         { organisation_name: organisation_name },
-        { $push: { users: { userId: newUser._id, name: `${firstName} ${lastName}`,email:email, active: false } } }
+        { $push: { users: { userId: newUser._id, name: `${firstName} ${lastName}`, email: email, active: false } } }
       );
 
       // ? console.log(`User added to department: ${organisation_name}`);
@@ -214,7 +216,7 @@ const validateUserSignUp = async (email, otp) => {
     { arrayFilters: [{ "elem.userId": user._id }] }
   );
 
-  return [true, updatedUser];
+  return { success: true, message: "Email verified successfully" };
 };
 
 module.exports.generateNewAdminOTP = async (req, res) => {
