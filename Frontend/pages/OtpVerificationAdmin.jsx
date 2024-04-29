@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { verifyOtp, resendOtp } from '@/services';
+import { verifyOtpAdmin, resendOtpAdmin } from '@/services';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -15,11 +15,11 @@ export default function OtpVerification() {
             toast.error('Email not found.');
             return;
         }
-        const res = await verifyOtp(email, otp);
+        const res = await verifyOtpAdmin(email, otp);
         if (res.success) {
             toast.success(res.message);
             setTimeout(() => {
-                router.push('/');
+                router.push('/admin');
             }, 2000);
         } else {
             toast.error(res.message);
@@ -33,7 +33,7 @@ export default function OtpVerification() {
             return;
         }
         try {
-            const res = await resendOtp(email);
+            const res = await resendOtpAdmin(email);
             if (res.success) {
                 toast.success(res.message);
             } else {

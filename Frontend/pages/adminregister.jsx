@@ -1,4 +1,4 @@
-import { register_user } from '@/services';
+import {register_admin} from '@/services';
 import Link from 'next/link';
 import React, { useState } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
@@ -12,22 +12,26 @@ export default function Register() {
         lastName: "", 
         email: "", 
         password: "", 
-        dateOfBirth: "", 
-        organisation_name: "" 
     });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const res = await register_user(formData);
-        if (res.success) {
-            toast.success(res.message);
-            setTimeout(() => {
-            router.push(`/OtpVerification?email=${formData.email}`);
-            },1000);
-        } else {
-            toast.error(res.message);
+        try {
+            const res = await register_admin(formData);
+            if (res.success) {
+                toast.success(res.message);
+                setTimeout(() => {
+                    router.push(`/OtpVerificationAdmin?email=${formData.email}`);
+                  }, 1000);
+            } else {
+                toast.error(res.message);
+            }
+        } catch (error) {
+            console.error('Error during registration:', error);
+            toast.error('An error occurred during registration. Please try again later.');
         }
     };
+    
 
     return (
         <>
@@ -55,17 +59,9 @@ export default function Register() {
                                     <label htmlFor="password" className="block mb-2 text-sm font-medium text-indigo-700 dark:text-white">Password</label>
                                     <input onChange={(e) => setFormData({ ...formData, password: e.target.value })} type="password" name="password" id="password" placeholder="••••••••" className="bg-indigo-50 border border-indigo-300 text-indigo-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-indigo-700 dark:border-indigo-600 dark:placeholder-indigo-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
                                 </div>
-                                <div className='text-left'>
-                                    <label htmlFor="dateOfBirth" className="block mb-2 text-sm font-medium text-indigo-700 dark:text-white">Date of Birth</label>
-                                    <input onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })} type="date" name="dateOfBirth" id="dateOfBirth" className="bg-indigo-50 border border-indigo-300 text-indigo-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-indigo-700 dark:border-indigo-600 dark:placeholder-indigo-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-                                </div>
-                                <div className='text-left'>
-                                    <label htmlFor="organisation_name" className="block mb-2 text-sm font-medium text-indigo-700 dark:text-white">Organisation Name</label>
-                                    <input onChange={(e) => setFormData({ ...formData, organisation_name: e.target.value })} type="text" name="organisation_name" id="organisation_name" className="bg-indigo-50 border border-indigo-300 text-indigo-700 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-indigo-700 dark:border-indigo-600 dark:placeholder-indigo-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder='org001' required />
-                                </div>
                                 <button type="submit" className="w-full text-white bg-indigo-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Sign Up</button>
                                 <p className="text-sm font-light text-indigo-500 dark:text-indigo-400">
-                                    Already have an account  <Link href="/" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign In</Link>
+                                    Already have an account  <Link href="/admin" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign In</Link>
                                 </p>
                             </form>
                         </div>

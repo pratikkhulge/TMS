@@ -39,7 +39,7 @@ const updateDepartment = async (req, res) => {
 
     if (organisation_name) {
       const existingDepartment = await Department.findOne({ organisation_name: organisation_name });
-      if (existingDepartment && existingDepartment._id.toString() !== department._id.toString()) {
+      if (existingDepartment || existingDepartment._id.toString() !== department._id.toString()) {
         return res.status(400).send({ message: 'Organization name already associated with another department' });
       }
     }
@@ -76,4 +76,20 @@ const deleteDepartment = async (req, res) => {
   }
 };
 
-module.exports = { addDepartment, updateDepartment, deleteDepartment };
+
+const showAllDepartments = async (req, res) => {
+  try {
+    // Authorize admin
+    const { authorized } = await authorizeAdmin(req, res);
+    if (!authorized) {
+      return res.status(403).json({ success:false ,message: 'Unauthorized: Only admin users can view all tickets' });
+    }
+
+    const departments = await Department.find();
+    res.status(200).json({departments});
+  } catch (error) {
+    res.status(500).json({success:false, message: 'Failed to fetch tickets', error: error.message });
+  }
+};
+
+module.exports = { addDepartment, updateDepartment, deleteDepartment,showAllDepartments };

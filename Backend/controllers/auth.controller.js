@@ -10,15 +10,39 @@ module.exports.signUpAdmin = async (req, res) => {
   const isExisting = await findAdminByEmail(email);
 
   if (isExisting) {
-    return res.send("Admin already exists");
+    return res.send({message:"Admin already exists"});
   }
   const newAdmin = await createAdmin(email, password);
-  if (!newAdmin[0]) {
-    return res.status(400).send({
-      message: "Unable to create new admin",
-    });
+  if (!newAdmin) {
+    return res.status(400).send({ success: false, message: "Unable to create new admin" });
+}
+res.send({ success: true, message: "Admin registered", data: newAdmin });
+
+};
+// Function to create a new admin
+const createAdmin = async (email, password) => {
+  const hashedPassword = await encrypt(password);
+  const otpGenerated = generateOTP();
+  const newAdmin = await Admin.create({
+    email,
+    password: hashedPassword,
+    otp: {
+      code: otpGenerated,
+      createdAt: new Date(),
+    },
+  });
+  if (!newAdmin) {
+    return ({success:false, message:"Unable to sign up admin"});
   }
-  res.send(newAdmin);
+  try {
+    await sendMail({
+      to: email,
+      OTP: otpGenerated,
+    });
+    return ({success: true, message:"Admin registered" , data: newAdmin});
+  } catch (error) {
+    return ({success:false, message:"Unable to sign up admin, Please try again later", error:error});
+  }
 };
 
 module.exports.signUpUser = async (req, res) => {
@@ -58,18 +82,18 @@ module.exports.signUpUser = async (req, res) => {
     // Create the user and associate it with the department
     const newUser = await createUser(email, password, firstName, lastName, dateOfBirth, department._id, organisation_name);
 
-    if (!newUser[0]) {
+    if (!newUser) {
       return res.status(400).send({ message: "Unable to create new user." });
     }
 
     // res.send(newUser);
-    res.send({ success: true, message: `Welcome ${firstName} ${lastName}! User Registered Successfully` });
+    // res.send({ success: true, message: `Welcome ${firstName} ${lastName}! User Registered Successfully` });
+    res.send(newUser);
   } catch (error) {
     console.error("User signup error:", error);
     res.status(500).send({ message: "Internal server error." });
   }
 };
-
 // Function to create a new user
 const createUser = async (email, password, firstName, lastName, dateOfBirth, departmentId, organisation_name) => {
   const hashedPassword = await encrypt(password);
@@ -89,7 +113,7 @@ const createUser = async (email, password, firstName, lastName, dateOfBirth, dep
   });
 
   if (!newUser) {
-    return [false, "Unable to sign up user"];
+    return {success:false, message:"Unable to sign up user"};
   }
 
   try {
@@ -107,7 +131,7 @@ const createUser = async (email, password, firstName, lastName, dateOfBirth, dep
     } else {
       // If the department doesn't exist, handle the error accordingly
       console.error(`Department ${organisation_name} not found`);
-      return [false, `Department ${organisation_name} not found`];
+      return {success:false, message:`Department ${organisation_name} not found`};
     }
 
     // Send success response
@@ -115,36 +139,11 @@ const createUser = async (email, password, firstName, lastName, dateOfBirth, dep
       to: email,
       OTP: otpGenerated,
     });
-    return [true, newUser];
+    // return {success:true, newUser};
+    return ({ success: true, message: `Welcome ${firstName} ${lastName}! User Registered Successfully` });
   } catch (error) {
     console.error("User signup error:", error);
-    return [false, "Unable to sign up user, Please try again later", error];
-  }
-};
-
-// Function to create a new admin
-const createAdmin = async (email, password) => {
-  const hashedPassword = await encrypt(password);
-  const otpGenerated = generateOTP();
-  const newAdmin = await Admin.create({
-    email,
-    password: hashedPassword,
-    otp: {
-      code: otpGenerated,
-      createdAt: new Date(),
-    },
-  });
-  if (!newAdmin) {
-    return [false, "Unable to sign up admin"];
-  }
-  try {
-    await sendMail({
-      to: email,
-      OTP: otpGenerated,
-    });
-    return [true, newAdmin];
-  } catch (error) {
-    return [false, "Unable to sign up admin, Please try again later", error];
+    return {success:false, message:"Unable to sign up user, Please try again later", error};
   }
 };
 
@@ -154,12 +153,10 @@ module.exports.verifyAdminEmail = async (req, res) => {
   const admin = await validateAdminSignUp(email, otp);
   res.send(admin);
 };
-
 module.exports.verifyUserEmail = async (req, res) => {
   const { email, otp } = req.body;
   const user = await validateUserSignUp(email, otp);
-  // !console.log(user);
-  res.send({user});
+  res.send(user);
 };
 
 // Function to find admin by email
@@ -167,7 +164,6 @@ const findAdminByEmail = async (email) => {
   const admin = await Admin.findOne({ email });
   return admin;
 };
-
 // Function to find user by email
 const findUserByEmail = async (email) => {
   const admin = await User.findOne({ email });
@@ -180,33 +176,33 @@ const findUserByEmail = async (email) => {
 const validateAdminSignUp = async (email, otp) => {
   const admin = await Admin.findOne({ email });
   if (!admin) {
-    return [false, "Admin not found"];
+    return {success:false, message:"Admin not found"};
   }
   const { code, createdAt } = admin.otp;
   const currentTime = new Date();
   const timeDifference = currentTime - new Date(createdAt);
   if (code !== otp || timeDifference > 60000) { // Check if OTP is expired (1 minute)
-    return [false, "Invalid or expired OTP"];
+    return {success:false, message:"Invalid or expired OTP"};
   }
   // If OTP is valid, update admin's record
   const updatedAdmin = await Admin.findByIdAndUpdate(admin._id, {
     $set: { active: true },
     $unset: { otp: 1 }, // Remove OTP from admin's record
   });
-  return [true, updatedAdmin];
+  return {success:true, message: "Email verified successfully" , updatedAdmin};
 };
 
 // Function to validate user signup with OTP
 const validateUserSignUp = async (email, otp) => {
   const user = await User.findOne({ email });
   if (!user) {
-    return [false, "User not found"];
+    return {success:false, message:"User not found"};
   }
   const { code, createdAt } = user.otp;
   const currentTime = new Date();
   const timeDifference = currentTime - new Date(createdAt);
   if (code !== otp || timeDifference > 60000) { // Check if OTP is expired (1 minute)
-    return [false, "Invalid or expired OTP"];
+    return {success:false, message:"Invalid or expired OTP"};
   }
   // If OTP is valid, update user's record
   const updatedUser = await User.findByIdAndUpdate(user._id, {
@@ -229,11 +225,11 @@ module.exports.generateNewAdminOTP = async (req, res) => {
   const { email } = req.body;
   const admin = await findAdminByEmail(email);
   if (!admin) {
-    return res.status(404).send("Admin not found");
+    return res.status(404).send({success:false , message:"Admin not found"});
   }
 
   if (admin.active) {
-    return res.send({ message: "User is already verified" });
+    return res.send({ success:true , message: "User is already verified" });
   }
   const newOTP = generateOTP();
   await Admin.findByIdAndUpdate(admin._id, {
@@ -244,9 +240,9 @@ module.exports.generateNewAdminOTP = async (req, res) => {
       to: email,
       OTP: newOTP,
     });
-    res.send("New OTP generated and sent to admin's email.");
+    res.send({success:true , message:"New OTP generated and sent to admin's email."});
   } catch (error) {
-    res.status(500).send("Failed to send OTP. Please try again later.");
+    res.status(500).send({success:false, message:"Failed to send OTP. Please try again later."});
   }
 };
 

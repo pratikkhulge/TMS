@@ -19,9 +19,16 @@ const createTicket = async (req, res) => {
       return res.status(400).json({ success:false , message: 'Assignee not found in your organization' });
     }
 
-    // Generate the key using organisation_name and incremental number
-    const ticketCount = await Ticket.countDocuments({ organisation });
-    const key = `${organisation}-${ticketCount + 1}`;
+    // Fetch the latest ticket key for the organization
+    const latestTicket = await Ticket.findOne({ key: { $regex: `^${organisation}-` } }).sort({ _id: -1 });
+
+    // Generate the new ticket key using the fetched key and increment
+    let ticketCount = 1;
+    if (latestTicket) {
+      const [latestCount] = latestTicket.key.split('-')[1];
+      ticketCount = parseInt(latestCount) + 1;
+    }
+    const key = `${organisation}-${ticketCount}`;
 
     // Create the ticket
     const ticket = await Ticket.create({
@@ -61,7 +68,7 @@ const createTicket = async (req, res) => {
 
     res.status(201).json({  success:true ,message: 'Ticket created successfully', ticket });
   } catch (error) {
-    res.status(500).json({ success:false , message: 'Failed to create ticket', error: error.message });
+    res.status(500).json({ success:false , error: 'Failed to create ticket', message: error.message });
   }
 };
 
@@ -79,6 +86,7 @@ const showAllTickets = async (req, res) => {
     res.status(500).json({success:false, message: 'Failed to fetch tickets', error: error.message });
   }
 };
+
 
 const showTicketsInOrganization = async (req, res) => {
   try {
