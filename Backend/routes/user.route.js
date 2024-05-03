@@ -10,5 +10,8 @@ router.post('/login', loginController.userLogin);
 router.get('/tickets', ticketController.showTicketsInOrganization);
 router.post('/tickets/create', ticketController.createTicket);
 router.put('/tickets/update/:key', ticketController.updateTicket);
+router.post('/loginUserOTP',authController.loginUserOTP);
+router.post('/userLoginWithOtp',loginController.userLoginWithOtp);
+
 module.exports = router;
 

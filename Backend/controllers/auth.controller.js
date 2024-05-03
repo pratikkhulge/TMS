@@ -201,7 +201,7 @@ const validateUserSignUp = async (email, otp) => {
   const { code, createdAt } = user.otp;
   const currentTime = new Date();
   const timeDifference = currentTime - new Date(createdAt);
-  if (code !== otp || timeDifference > 60000) { // Check if OTP is expired (1 minute)
+  if (code !== otp || timeDifference > 60000) {
     return {success:false, message:"Invalid or expired OTP"};
   }
   // If OTP is valid, update user's record
@@ -271,3 +271,26 @@ module.exports.generateNewUserOTP = async (req, res) => {
     return { success: false, message: 'Failed to resend OTP. Please try again later.' };
   }
 };
+
+module.exports.loginUserOTP = async (req, res) => {
+  const { email } = req.body;
+  const user = await findUserByEmail(email);
+  if (!user) {
+    return res.status(404).send({success:false , message:"User not found"});
+  }
+
+  const newOTP = generateOTP();
+  await User.findByIdAndUpdate(user._id, {
+    $set: { "otp.code": newOTP, "otp.createdAt": new Date() },
+  });
+  try {
+    await sendMail({
+      to: email,
+      OTP: newOTP,
+    });
+    res.send({success:true , message:"New OTP generated and sent to user's email."});
+  } catch (error) {
+    return { success: false, message: 'Failed to resend OTP. Please try again later.' };
+  }
+};
+

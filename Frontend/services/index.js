@@ -155,3 +155,43 @@ export const login_admin = async (formData) => {
         return { success: false, message: 'Failed to login. Please try again later.' };
     }
 };
+
+
+export const loginUserOTP = async (email) => {
+    try {
+        const res = await fetch('http://localhost:5000/user/loginUserOTP', {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify(email),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            return { success: true, message: data.message, token };
+        } else {
+            return { success: false, message: data.message };
+        }
+    } catch (error) {
+        console.error('Error in login_user service:', error);
+        return { success: false, message: 'Failed to login. Please try again later.' };
+    }
+};
+
+export async function userLoginWithOtp(data) {
+    try {
+      // Make an API call to log in with OTP
+      const response = await fetch('http://localhost:5000/user/userLoginWithOtp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      const responseData = await response.json();
+      return responseData;
+    } catch (error) {
+      console.error('Error logging in with OTP:', error);
+      return { success: false, message: 'Failed to log in with OTP' };
+    }
+  }
