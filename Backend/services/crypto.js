@@ -15,3 +15,4 @@ module.exports.compare = async (data, hash) => {
   const value = await bcrypt.compare(data, hash);
   return value;
 };
+

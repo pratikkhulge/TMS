@@ -4,3 +4,5 @@ module.exports.generateOTP = () => {
   const OTP = otpGenerator.generate(OTP_LENGTH, OTP_CONFIG);
   return OTP;
 };
+
+

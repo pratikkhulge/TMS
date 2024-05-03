@@ -79,5 +79,6 @@ const addComment = async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: 'Failed to delete comment', error: error.message });
     }
+    
   };
   

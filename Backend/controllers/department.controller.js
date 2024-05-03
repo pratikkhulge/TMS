@@ -93,3 +93,4 @@ const showAllDepartments = async (req, res) => {
 };
 
 module.exports = { addDepartment, updateDepartment, deleteDepartment,showAllDepartments };
+

@@ -89,6 +89,7 @@ export const verifyOtp = async (email, otp) => {
 };
 
 
+
 export const verifyOtpAdmin = async (email, otp) => {
     try {
         const res = await fetch(`http://localhost:5000/admin/verify`, {

@@ -37,3 +37,5 @@ const authorizeAdmin = async (req, res) => {
 };
 
 module.exports = { authorizeAdmin };
+
+

@@ -60,5 +60,6 @@ export default function DepartmentDetailsModal({ department, onSave, onClose }) 
 
             <button onClick={onClose} className="bg-indigo-700 text-white font-semibold px-4 py-2 rounded-md mt-4 w-full">Close</button>
         </div>
+        
     );
 }

@@ -23,6 +23,7 @@ export default function Register() {
                 setTimeout(() => {
                     router.push(`/OtpVerificationAdmin?email=${formData.email}`);
                   }, 1000);
+
             } else {
                 toast.error(res.message);
             }
@@ -69,6 +70,7 @@ export default function Register() {
                 </div>
             </section>
             <ToastContainer />
+            
         </>
     )
 }

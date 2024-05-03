@@ -15,5 +15,4 @@ router.put('/department/:organizationName', deptController.updateDepartment);
 router.delete('/department/:organizationName', deptController.deleteDepartment); 
 router.get('/tickets/all', ticketController.showAllTickets); 
 
-
 module.exports = router;
